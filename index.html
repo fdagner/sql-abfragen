@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>SQL-Verbrecherdatenbank (extern)</title>
+  <script src="lib/sqljs/sql-wasm.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2em;
+      background: #f4f4f4;
+      color: #333;
+      margin: 0 auto;
+    }
+
+    #sql-container {
+      max-width: 1600px;
+      min-width: 900px;
+      margin: 0 auto;
+    }
+  
+    h1 {
+      font-size: 2em;
+      color: #222;
+      margin-bottom: 1.5em;
+      text-align: center;
+    }
+  
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+      resize: vertical;
+      box-sizing: border-box;
+      margin-bottom: 1em;
+      background-color: white;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+  
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+  
+    th {
+      background-color: #f0f0f0;
+    }
+  
+    button {
+      padding: 8px 16px;
+      margin: 6px 4px 6px 0;
+      font-size: 0.95em;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+  
+    button.abfrage {
+      background-color: #d52d9d;
+      color: white;
+    }
+  
+    button.abfrage:hover {
+      background-color: #e22fa6;
+      transform: translateY(-2px);
+    }
+  
+    button.abfrage:active {
+      background-color: #c01c8b;
+      transform: translateY(1px);
+    }
+  
+    button.export {
+      background-color: #28a745;
+      color: white;
+    }
+  
+    button.export:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
+    }
+  
+    button.export:active {
+      background-color: #1e7e34;
+      transform: translateY(1px);
+    }
+  
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  
+    #upload-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5em;
+      margin-top: 1.5em;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  
+    #count-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 1.5em;
+      margin-bottom: 1em;
+    }
+  
+    #export-buttons {
+      display: none;
+      gap: 8px;
+    }
+  
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  
+    #schema-output details {
+      margin-bottom: 0.5em;
+    }
+  
+    #schema-output summary {
+      font-weight: bold;
+      cursor: pointer;
+    }
+  
+    #schema-output ul {
+      margin-top: 0.4em;
+      margin-bottom: 0.8em;
+      padding-left: 1.2em;
+    }
+
+    details {
+            margin-bottom: 1em;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            border-radius: 4px;
+            }
+            summary {
+            cursor: pointer;
+            font-weight: bold;
+            outline: none;
+            }
+            summary::-webkit-details-marker {
+            margin-right: 10px;
+            }
+  </style>
+  
+  <body>
+    <div id="sql-container">
+    <h1>SQL-Datenbanken abfragen</h1>
+    <details><summary>Datenbank-Datei hochladen (optional)</summary>
+    <div id="upload-container">
+      <input type="file" id="db-upload" accept=".sqlite,.db,.sqlite3" />
+    </div>
+    </details>
+  
+    <div id="schema-output"></div>
+  
+    <p>Beispielabfrage: <code id="example-query"></code></p>
+  
+    <textarea id="sql" placeholder="SQL-Abfrage hier eingeben…"></textarea>
+  
+    <button class="abfrage" onclick="runQuery()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" style="width: 12px; fill: white;vertical-align:middle"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg> Abfrage ausführen</button>
+    <button class="abfrage" onclick="saveDb()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" style="width: 20px; fill: white;vertical-align:middle"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128l-368 0zm79-167l80 80c9.4 9.4 24.6 9.4 33.9 0l80-80c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-39 39L344 184c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 134.1-39-39c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9z"/></svg> Datenbank speichern</button>
+    <button id="reset-db" class="abfrage"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 16px; fill: white;vertical-align:middle"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 224c0 17.7 14.3 32 32 32s32-14.3 32-32c0-53 43-96 96-96l160 0 0 32c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-9.2-9.2-22.9-11.9-34.9-6.9S320 19.1 320 32l0 32L160 64C71.6 64 0 135.6 0 224zm512 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 53-43 96-96 96l-160 0 0-32c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6l0-32 160 0c88.4 0 160-71.6 160-160z"/></svg> Standard-DB laden</button>
+    <div id="count-container">
+      <p id="count-text"></p>
+      <div id="export-buttons">
+        <button class="export" onclick="downloadAsCSV()">📄 CSV</button>
+        <button class="export" onclick="downloadAsJSON()">🧾 JSON</button>
+      </div>
+    </div>
+  
+    <div id="output"></div>
+    <section style="margin-top: 2em;border-top: 2px dashed #ccc">
+      <h2>FAQ – Häufige Fragen</h2>
+      <details>
+        <summary>Warum dieses Tool?</summary>
+        <p>Dieses Tool kann im Unterricht genutzt werden, um den Schülern praxisnah den Umgang mit Datenbanken und SQL beizubringen. Es ermöglicht eine interaktive und visuelle Arbeit mit realen Datenbankabfragen, ohne dass eine lokale Installation erforderlich ist. Die Schüler können SQL-Abfragen formulieren und die Ergebnisse direkt im Browser anzeigen lassen. Dies fördert das Verständnis von Datenbankstrukturen und SQL-Befehlen in einem praktischen Kontext.</p>
+      </details>     
+      <details>
+        <summary>Wie kann ich eine eigene SQLite-Datei hochladen?</summary>
+        <p>Nutze den Dateiupload. Die Datenbank wird dann im Browser gespeichert und steht bei späterem Besuch wieder zur Verfügung.</p>
+      </details>
+    
+      <details>
+        <summary>Wie kann ich meine aktuelle Datenbank zurücksetzen?</summary>
+        <p>Mit einem Klick auf „Zurücksetzen“ wird die gespeicherte Datenbank aus dem Browser entfernt und die Standard-Datenbank geladen.</p>
+      </details>
+    
+      <details>
+        <summary>Wo werden meine Daten gespeichert?</summary>
+        <p>Die Datenbank wird lokal im Browser gespeichert (IndexedDB). Es erfolgt keine Übertragung an einen Server. Die dafür verwendete JavaScript-Bibliothek ist sql.js, die es ermöglicht, SQLite-Datenbanken vollständig im Browser auszuführen, ohne dass ein Server benötigt wird. </p>
+      </details>
+    
+      <details>
+        <summary>Wie kann ich die Ergebnisse der Abfragen exportieren?</summary>
+        <p>Die Ergebnisse können im CSV- oder JSON-Format mit den entsprechenden Buttons heruntergeladen werden.</p>
+      </details>
+      <details>
+        <summary>Wie kann ich dieses Tool in Moodle einbinden?</summary>
+        <ol>
+          <li><strong>Hochladen der Dateien:</strong> Lade alle Dateien innerhalb der Uoloadfunktion bei "Datei" als ZIP-Datei hoch.</li>
+          <li><strong>Entzippen der Dateien:</strong> Entpacke das Archiv direkt.</li>
+          <li><strong>Hauptdatei setzen:</strong> Setze die index.html als Hauptdatei.</li>
+          </ol>
+         </details>
+    </section>
+    </div>
+    <script src="lib/script.js"></script>
+
+</body>
+</html>
