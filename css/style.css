@@ -12,11 +12,16 @@ body {
     margin: 0 auto;
 }
 
+#sql, #optionen {
+    min-width: 350px;
+    max-width: 600px;
+}
+
 h1 {
     font-size: 2em;
     color: #222;
     margin-bottom: 1.5em;
-    text-align: center;
+    text-align: left;
 }
 
 textarea {
