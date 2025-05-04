@@ -164,3 +164,7 @@ summary {
 summary::-webkit-details-marker {
     margin-right: 10px;
 }
+
+.hidden {
+    display: none;
+}

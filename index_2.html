@@ -14,7 +14,7 @@
   <div id="sql-container">
     <h1>SQL-Abfragen</h1>
     <div id="optionen">
-    <details>
+    <details class="hidden">
       <summary>Datenbank-Datei hochladen (optional)</summary>
       <div id="upload-container">
         <input type="file" id="db-upload" accept=".sqlite,.db,.sqlite3" />
@@ -50,50 +50,7 @@
     </div>
 
     <div id="output"></div>
-    <section style="margin-top: 2em;margin-bottom: 2em;border-bottom: 2px dashed #ccc;border-top: 2px dashed #ccc">
-      <h2>FAQ – Häufige Fragen</h2>
-      <details>
-        <summary>Warum dieses Tool?</summary>
-        <p>Dieses Tool kann im Unterricht genutzt werden, um den Schülern praxisnah den Umgang mit Datenbanken und SQL
-          beizubringen. Es ermöglicht eine interaktive und visuelle Arbeit mit realen Datenbankabfragen, ohne dass eine
-          lokale Installation erforderlich ist. Die Schüler können SQL-Abfragen formulieren und die Ergebnisse direkt im
-          Browser anzeigen lassen. Dies fördert das Verständnis von Datenbankstrukturen und SQL-Befehlen in einem
-          praktischen Kontext.</p>
-      </details>
-      <details>
-        <summary>Wie kann ich eine eigene SQLite-Datei hochladen?</summary>
-        <p>Nutze den Dateiupload. Die Datenbank wird dann im Browser gespeichert und steht bei späterem Besuch wieder
-          zur Verfügung. Eine Beispieldatenbank kannst du unter <a href="https://www.sqlitetutorial.net/sqlite-sample-database/">https://www.sqlitetutorial.net/sqlite-sample-database/</a> herunterladen.</p>
-      </details>
-
-      <details>
-        <summary>Wie kann ich meine aktuelle Datenbank zurücksetzen?</summary>
-        <p>Mit einem Klick auf "Standard-DB laden" wird die gespeicherte Datenbank aus dem Browser entfernt und die
-          Standard-Datenbank geladen.</p>
-      </details>
-
-      <details>
-        <summary>Wo werden meine Daten gespeichert?</summary>
-        <p>Die Datenbank wird lokal im Browser gespeichert (IndexedDB). Es erfolgt keine Übertragung an einen Server.
-          Die dafür verwendete JavaScript-Bibliothek ist sql.js, die es ermöglicht, SQLite-Datenbanken vollständig im
-          Browser auszuführen, ohne dass ein Server benötigt wird. </p>
-      </details>
-
-      <details>
-        <summary>Wie kann ich die Ergebnisse der Abfragen exportieren?</summary>
-        <p>Die Ergebnisse können im CSV- oder JSON-Format mit den entsprechenden Buttons heruntergeladen werden.</p>
-      </details>
-      <details>
-        <summary>Wie kann ich dieses Tool in Moodle einbinden?</summary>
-        <ol>
-          <li><strong>Hochladen der Dateien:</strong> Lade alle Dateien innerhalb der Uoloadfunktion bei "Datei" als
-            ZIP-Datei hoch.</li>
-          <li><strong>Entzippen der Dateien:</strong> Entpacke das Archiv direkt.</li>
-          <li><strong>Hauptdatei setzen:</strong> Setze die index.html als Hauptdatei.</li>
-        </ol>
-      </details>
-    </section>
-    <a href="https://github.com/fdagner/sql-abfragen">Github-Repository</a>
+    <a class="hidden" href="https://github.com/fdagner/sql-abfragen">Github-Repository</a>
   </div>
   <script src="lib/script.js"></script>
   <script>
